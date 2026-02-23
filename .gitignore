@@ -1,0 +1,8 @@
+/pkg/
+/.yardoc/
+/doc/
+/.ruby-lsp/
+/coverage/
+*.gem
+AGENTS.md
+CLAUDE.md

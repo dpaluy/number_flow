@@ -1,0 +1,56 @@
+.nf {
+  --nf-duration: 400ms;
+  --nf-easing: cubic-bezier(0.2, 0, 0, 1);
+  --nf-stagger: 20ms;
+  --nf-digit-height: 1em;
+  --nf-gap: 0.04em;
+
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--nf-gap);
+  line-height: 1;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.nf__digit,
+.nf__separator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--nf-digit-height);
+}
+
+.nf__digit {
+  position: relative;
+  width: 0.68em;
+  overflow: hidden;
+}
+
+.nf__track {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(var(--nf-current-digit, 0) * var(--nf-digit-height) * -1));
+  will-change: transform;
+}
+
+.nf__track--animated {
+  transition-property: transform;
+  transition-duration: var(--nf-duration);
+  transition-timing-function: var(--nf-easing);
+  transition-delay: calc(var(--nf-stagger) * var(--nf-index-from-right, 0));
+}
+
+.nf__cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--nf-digit-height);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf__track--animated {
+    transition: none;
+  }
+}
+
