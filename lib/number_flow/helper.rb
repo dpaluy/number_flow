@@ -41,7 +41,7 @@ module NumberFlow
             number_flow_easing_value: easing.to_s,
             number_flow_stagger_value: Integer(stagger),
             number_flow_grouping_value: grouping == true,
-            number_flow_precision_value: Integer(precision),
+            number_flow_precision_value: precision.positive? ? Integer(precision) : nil,
             number_flow_locale_value: locale
           },
           normalize_data_hash(data),

@@ -8,7 +8,10 @@ require 'rails/generators/test_case'
 require 'tmpdir'
 require 'fileutils'
 
-require File.expand_path('../../lib/generators/number_flow/install/install_generator', __dir__)
+# Do NOT directly require the generator file here.
+# The generator must be loaded via require 'number_flow' (already done in
+# test_helper), which exercises the real load path in lib/number_flow.rb.
+# This test catches dead require_relative paths.
 
 module NumberFlow
   class InstallGeneratorTest < Rails::Generators::TestCase
@@ -84,6 +87,14 @@ module NumberFlow
 
       refute File.exist?(File.join(destination_root, 'app/frontend/controllers/number_flow_controller.js'))
       refute File.exist?(File.join(destination_root, 'app/frontend/stylesheets/number_flow.css'))
+    end
+
+    # Regression test: lib/number_flow.rb must load the generator via the
+    # correct require_relative path so it is available after require 'number_flow'.
+    # This catches dead path bugs (e.g. '../generators' instead of 'generators').
+    def test_generator_loaded_via_require_number_flow
+      assert defined?(NumberFlow::Generators::InstallGenerator),
+             'NumberFlow::Generators::InstallGenerator must be defined after require \'number_flow\''
     end
   end
 end

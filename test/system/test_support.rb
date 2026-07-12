@@ -9,8 +9,20 @@ require 'capybara/dsl'
 begin
   require 'capybara/cuprite'
 
+  # CI runners (and Docker containers) run as root, so Chrome requires
+  # --no-sandbox.  Increasing process_timeout from the Ferrum default of
+  # 10s to 30s accommodates slow CI runners launching modern Chrome/Chromium.
   Capybara.register_driver(:number_flow_cuprite) do |app|
-    Capybara::Cuprite::Driver.new(app, headless: true, js_errors: true, window_size: [1280, 720])
+    Capybara::Cuprite::Driver.new(app,
+                                  headless: true,
+                                  js_errors: true,
+                                  window_size: [1280, 720],
+                                  process_timeout: 30,
+                                  browser_options: {
+                                    'no-sandbox' => nil,
+                                    'disable-gpu' => nil,
+                                    'disable-dev-shm-usage' => nil
+                                  })
   end
 
   Capybara.default_driver = :number_flow_cuprite
@@ -85,9 +97,9 @@ module NumberFlow
         "data-number-flow-duration-value=\"#{duration}\"",
         "data-number-flow-easing-value=\"#{easing}\"",
         "data-number-flow-stagger-value=\"#{stagger}\"",
-        "data-number-flow-grouping-value=\"#{grouping}\"",
-        "data-number-flow-precision-value=\"#{precision}\""
+        "data-number-flow-grouping-value=\"#{grouping}\""
       ]
+      data_attrs << "data-number-flow-precision-value=\"#{precision}\"" if precision.positive?
       data_attrs << "data-number-flow-locale-value=\"#{locale}\"" if locale
 
       # Build digit spans

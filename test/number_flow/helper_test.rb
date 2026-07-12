@@ -111,8 +111,11 @@ module NumberFlow
       html = build_view.number_flow_tag(1234)
 
       assert_includes html, 'data-number-flow-value-value="1234"'
-      assert_includes html, 'data-number-flow-precision-value="0"'
       assert_includes html, 'aria-label="1234"'
+      # precision: 0 (default) must NOT emit a precision data attribute
+      # so integer output is byte-identical to the original gem.
+      refute_includes html, 'data-number-flow-precision-value'
+      refute_includes html, 'data-number-flow-locale-value'
     end
 
     def test_locale_option_emits_data_attribute

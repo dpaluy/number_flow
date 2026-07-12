@@ -19,7 +19,7 @@ end
 # Load Rails generators when Rails is available.
 begin
   require 'rails'
-  require_relative '../generators/number_flow/install/install_generator'
+  require_relative 'generators/number_flow/install/install_generator'
 rescue LoadError
   # Rails is not available — generators are not loaded.
 end
