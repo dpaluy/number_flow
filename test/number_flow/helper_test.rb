@@ -73,12 +73,74 @@ module NumberFlow
       assert_includes html, 'id="counter"'
     end
 
-    def test_raises_on_non_integer_value
+    def test_raises_on_non_numeric_value
       error = assert_raises(ArgumentError) do
         build_view.number_flow_tag('invalid')
       end
 
-      assert_includes error.message, 'integer-compatible'
+      assert_includes error.message, 'numeric value'
+    end
+
+    def test_renders_decimal_value
+      html = build_view.number_flow_tag(12.34, precision: 2)
+
+      assert_includes html, 'data-number-flow-value-value="12.34"'
+      assert_includes html, 'data-number-flow-precision-value="2"'
+      assert_includes html, 'aria-label="12.34"'
+      assert_includes html, 'nf__separator'
+      assert_includes html, 'data-digit="1"'
+      assert_includes html, 'data-digit="2"'
+    end
+
+    def test_decimal_with_precision_pads_zeros
+      html = build_view.number_flow_tag(10, precision: 2)
+
+      assert_includes html, 'aria-label="10.00"'
+      assert_includes html, 'data-number-flow-precision-value="2"'
+    end
+
+    def test_negative_decimal_value
+      html = build_view.number_flow_tag(-3.5, precision: 1)
+
+      assert_includes html, 'data-number-flow-value-value="-3.5"'
+      assert_includes html, 'aria-label="-3.5"'
+      assert_includes html, 'data-digit="3"'
+    end
+
+    def test_integer_regression_byte_identical
+      html = build_view.number_flow_tag(1234)
+
+      assert_includes html, 'data-number-flow-value-value="1234"'
+      assert_includes html, 'data-number-flow-precision-value="0"'
+      assert_includes html, 'aria-label="1234"'
+    end
+
+    def test_locale_option_emits_data_attribute
+      html = build_view.number_flow_tag(1234.5, precision: 1, locale: 'de-DE', grouping: true)
+
+      assert_includes html, 'data-number-flow-locale-value="de-DE"'
+      assert_includes html, 'data-number-flow-precision-value="1"'
+      assert_includes html, 'aria-label="1.234,5"'
+    end
+
+    def test_locale_en_us_grouping
+      html = build_view.number_flow_tag(1234.5, precision: 1, locale: 'en-US', grouping: true)
+
+      assert_includes html, 'data-number-flow-locale-value="en-US"'
+      assert_includes html, 'aria-label="1,234.5"'
+    end
+
+    def test_locale_nil_omits_data_attribute
+      html = build_view.number_flow_tag(1234)
+
+      refute_includes html, 'data-number-flow-locale-value'
+    end
+
+    def test_nine_nine_nine_rollover_format
+      html = build_view.number_flow_tag(9.99, precision: 2)
+
+      assert_includes html, 'aria-label="9.99"'
+      assert_includes html, 'data-digit="9"'
     end
   end
 end

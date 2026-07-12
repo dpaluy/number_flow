@@ -14,12 +14,14 @@ module NumberFlow
       easing: DEFAULT_EASING,
       stagger: DEFAULT_STAGGER,
       grouping: false,
+      precision: 0,
+      locale: nil,
       aria_label: nil,
       data: {},
       **html_options
     )
-      normalized_value = Integer(value)
-      formatted_value = format_integer(normalized_value, grouping: grouping)
+      normalized_value = coerce_number(value)
+      formatted_value = format_number(normalized_value, precision: precision, grouping: grouping, locale: locale)
       css_class = html_options.delete(:class)
       extra_data = html_options.delete(:data)
 
@@ -38,7 +40,9 @@ module NumberFlow
             number_flow_duration_value: Integer(duration),
             number_flow_easing_value: easing.to_s,
             number_flow_stagger_value: Integer(stagger),
-            number_flow_grouping_value: grouping == true
+            number_flow_grouping_value: grouping == true,
+            number_flow_precision_value: Integer(precision),
+            number_flow_locale_value: locale
           },
           normalize_data_hash(data),
           normalize_data_hash(extra_data)
@@ -49,10 +53,21 @@ module NumberFlow
         safe_join(formatted_value.chars.map { |char| build_character_fragment(char) })
       end
     rescue ArgumentError, TypeError
-      raise ArgumentError, 'number_flow_tag expects an integer-compatible value'
+      raise ArgumentError, 'number_flow_tag expects a numeric value'
     end
 
     private
+
+    def coerce_number(value)
+      case value
+      when Integer, Float
+        value
+      when String
+        Float(value)
+      else
+        value.respond_to?(:to_f) ? Float(value.to_f) : (raise ArgumentError)
+      end
+    end
 
     def build_character_fragment(char)
       if char.match?(/\d/)
@@ -80,11 +95,40 @@ module NumberFlow
       end
     end
 
-    def format_integer(value, grouping:)
+    def format_number(value, precision:, grouping:, locale:)
       sign = value.negative? ? '-' : ''
-      digits = value.abs.to_s
-      grouped = grouping ? digits.reverse.scan(/.{1,3}/).join(',').reverse : digits
-      "#{sign}#{grouped}"
+      abs_value = value.abs
+      decimal_sep = locale_decimal_separator(locale)
+      group_sep = locale_group_separator(locale)
+
+      if precision.positive?
+        integer_part = Integer(abs_value.floor)
+        fraction = format('%.0f', (abs_value - integer_part) * (10**precision)).rjust(precision, '0')
+        number_str = "#{group_digits(integer_part, grouping, group_sep)}#{decimal_sep}#{fraction}"
+      else
+        number_str = group_digits(Integer(abs_value), grouping, group_sep)
+      end
+
+      "#{sign}#{number_str}"
+    end
+
+    def group_digits(integer, grouping, separator)
+      digits = integer.to_s
+      return digits unless grouping
+
+      digits.reverse.scan(/.{1,3}/).join(separator).reverse
+    end
+
+    def locale_decimal_separator(locale)
+      return ',' if locale && !locale.start_with?('en')
+
+      '.'
+    end
+
+    def locale_group_separator(locale)
+      return '.' if locale && !locale.start_with?('en')
+
+      ','
     end
 
     def merged_data_attributes(*hashes)
