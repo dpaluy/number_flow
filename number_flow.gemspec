@@ -8,9 +8,9 @@ Gem::Specification.new do |spec|
   spec.authors = ['dpaluy']
   spec.email = ['dpaluy@users.noreply.github.com']
 
-  spec.summary = 'Rails helper + Stimulus digit flow transitions for integers.'
-  spec.description = 'NumberFlow provides a Rails helper and Stimulus controller for smooth integer digit ' \
-                     'transitions using gem-shipped CSS and JavaScript assets.'
+  spec.summary = 'Rails helper + Stimulus transitions for animated numbers.'
+  spec.description = 'NumberFlow provides a Rails helper and Stimulus controller for smooth, locale-aware ' \
+                     'number transitions using gem-shipped CSS and JavaScript assets.'
   spec.homepage = 'https://github.com/dpaluy/number_flow#readme'
   spec.license = 'MIT'
   spec.required_ruby_version = '>= 3.4.0'
