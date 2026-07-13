@@ -8,8 +8,14 @@ on:
 
 jobs:
   test:
-    name: Tests + Lint
+    name: Tests + Lint (Ruby ${{ matrix.ruby }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - "3.4"
+          - "4.0"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -18,7 +24,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4"
+          ruby-version: ${{ matrix.ruby }}
           bundler-cache: true
 
       - name: Run tests

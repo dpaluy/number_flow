@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-07-13
+
+### Added
+- Decimal and fractional number animations with configurable precision and rollover behavior.
+- Locale-aware number formatting powered by `Intl.NumberFormat`.
+- Optional `NumberFlow::Component` integration and a Vite installer generator.
+- Chromium/Cuprite browser coverage and continuous integration for browser behavior.
+
+### Changed
+- Improved negative-number and reduced-motion animation behavior.
+- Documented the decision to keep Number Flow distributed as a Ruby gem.
+
 ## [0.1.2] - 2026-07-12
 
 ### Changed
