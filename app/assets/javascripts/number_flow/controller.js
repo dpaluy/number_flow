@@ -8,7 +8,9 @@ export default class extends Controller {
     duration: Number,
     easing: String,
     stagger: Number,
-    grouping: Boolean
+    grouping: Boolean,
+    precision: Number,
+    locale: String
   }
 
   connect() {
@@ -41,41 +43,33 @@ export default class extends Controller {
       return
     }
 
-    this.updateTo(Math.trunc(nextValue))
+    this.updateTo(nextValue)
   }
 
   updateTo(nextValue) {
-    const normalized = Math.trunc(nextValue)
-    if (normalized === this.currentValue) return
+    if (nextValue === this.currentValue) return
+    if (!this.currentParts) return // Guard: not yet connected
 
     this.applyTimingVariables()
-    this.render(normalized, !this.prefersReducedMotion())
-    this.currentValue = normalized
-    this.valueValue = normalized
+    this.render(nextValue, !this.prefersReducedMotion())
+    this.currentValue = nextValue
+    this.valueValue = nextValue
   }
 
   render(value, animate) {
-    const previousDigits = this.currentParts.filter((part) => part.kind === "digit").map((part) => part.value)
+    const previousParts = this.currentParts
     const nextParts = this.partsFor(value)
-    const nextDigits = nextParts.filter((part) => part.kind === "digit").map((part) => part.value)
-
-    let digitIndex = 0
-    const totalDigits = nextDigits.length
     const fragment = document.createDocumentFragment()
 
-    nextParts.forEach((part) => {
+    nextParts.forEach((part, index) => {
       if (part.kind === "separator") {
         fragment.appendChild(this.buildSeparatorNode(part.value))
         return
       }
 
-      const remaining = totalDigits - digitIndex
-      const previousIndex = previousDigits.length - remaining
-      const fromDigit = previousIndex >= 0 ? previousDigits[previousIndex] : 0
-      const toDigit = part.value
-      const indexFromRight = totalDigits - digitIndex - 1
-      fragment.appendChild(this.buildDigitNode(fromDigit, toDigit, indexFromRight, animate))
-      digitIndex += 1
+      const { fromDigit } = this.alignDigit(previousParts, nextParts, index)
+      const indexFromRight = nextParts.length - index - 1
+      fragment.appendChild(this.buildDigitNode(fromDigit, part.value, indexFromRight, animate))
     })
 
     this.element.replaceChildren(fragment)
@@ -92,6 +86,20 @@ export default class extends Controller {
     this.currentParts = nextParts
   }
 
+  alignDigit(previousParts, nextParts, currentIndex) {
+    const nextDigits = nextParts.filter((p) => p.kind === "digit")
+    const previousDigits = previousParts.filter((p) => p.kind === "digit")
+
+    const currentDigitIndex = nextParts.slice(0, currentIndex).filter((p) => p.kind === "digit").length
+    const remaining = nextDigits.length - currentDigitIndex
+    const previousIndex = previousDigits.length - remaining
+
+    const fromDigit = previousIndex >= 0 ? previousDigits[previousIndex].value : 0
+    const toDigit = nextParts[currentIndex].value
+
+    return { fromDigit, toDigit }
+  }
+
   partsFor(value) {
     return this.formattedString(value).split("").map((char) => {
       if (/\d/.test(char)) {
@@ -103,10 +111,14 @@ export default class extends Controller {
   }
 
   formattedString(value) {
-    const sign = value < 0 ? "-" : ""
-    const digits = Math.abs(value).toString()
-    const groupedDigits = this.groupingValue ? digits.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : digits
-    return `${sign}${groupedDigits}`
+    const formatter = new Intl.NumberFormat(this.localeValue || undefined, {
+      useGrouping: this.groupingValue,
+      minimumFractionDigits: this.precisionValue,
+      maximumFractionDigits: this.precisionValue
+    })
+
+    const formatted = formatter.format(Math.abs(value))
+    return value < 0 ? `-${formatted}` : formatted
   }
 
   buildDigitNode(fromDigit, toDigit, indexFromRight, animate) {
@@ -150,19 +162,19 @@ export default class extends Controller {
 
   initialValue() {
     if (this.hasValueValue && Number.isFinite(this.valueValue)) {
-      return Math.trunc(this.valueValue)
+      return this.valueValue
     }
 
     const inlineValue = Number(this.element.getAttribute("data-number-flow-value-value"))
     if (Number.isFinite(inlineValue)) {
-      return Math.trunc(inlineValue)
+      return inlineValue
     }
 
     return 0
   }
 
   prefersReducedMotion() {
-    return this.reducedMotionMedia.matches
+    return this.reducedMotionMedia?.matches === true
   }
 
   durationOrDefault() {
@@ -170,7 +182,7 @@ export default class extends Controller {
   }
 
   easingOrDefault() {
-    return this.hasEasingValue ? this.easingValue : "cubic-bezier(0.2, 0, 0, 1)"
+    return this.hasEasingValue ? this.easingValue : "cubic-bezier(0.2, 0, 1)"
   }
 
   staggerOrDefault() {
@@ -181,4 +193,3 @@ export default class extends Controller {
     return typeof document !== "undefined" && document.location?.hostname === "localhost"
   }
 }
-

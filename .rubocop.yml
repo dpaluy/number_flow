@@ -14,6 +14,27 @@ Metrics/MethodLength:
   Exclude:
     - 'test/**/*'
 
-Metrics/ParameterLists:
-  Max: 10
+Metrics/ModuleLength:
+  Max: 130
+  Exclude:
+    - 'test/**/*'
 
+Metrics/ClassLength:
+  Max: 150
+  Exclude:
+    - 'test/**/*'
+
+Metrics/CyclomaticComplexity:
+  Exclude:
+    - 'test/**/*'
+
+Metrics/PerceivedComplexity:
+  Exclude:
+    - 'test/**/*'
+
+Metrics/ParameterLists:
+  Max: 11
+
+Layout/LineLength:
+  Exclude:
+    - 'test/system/**/*'

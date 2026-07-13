@@ -12,5 +12,20 @@ module NumberFlow
       assert_includes source, 'prefers-reduced-motion'
       assert_includes source, 'grouping'
     end
+
+    def test_controller_supports_decimal_precision
+      source = File.read(File.expand_path('../../app/assets/javascripts/number_flow/controller.js', __dir__))
+
+      assert_includes source, 'precision'
+      assert_includes source, 'minimumFractionDigits'
+      assert_includes source, 'maximumFractionDigits'
+    end
+
+    def test_controller_supports_locale
+      source = File.read(File.expand_path('../../app/assets/javascripts/number_flow/controller.js', __dir__))
+
+      assert_includes source, 'locale'
+      assert_includes source, 'Intl.NumberFormat'
+    end
   end
 end
