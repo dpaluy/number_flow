@@ -4,5 +4,6 @@
 /.ruby-lsp/
 /coverage/
 *.gem
+/Gemfile.lock
 AGENTS.md
 CLAUDE.md
