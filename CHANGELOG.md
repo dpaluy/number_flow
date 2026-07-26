@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated GitHub Actions checkout to v7 and browser-actions/setup-chrome to v2.
 - Updated Rake to 13.4.2, Minitest to 6.0.6, IRB to 1.18.0, and the Rails dependency set (including Action View and Railties) to 8.1.3.
-- Refreshed the lockfile against the combined dependency updates before release preparation.
 
 ## [0.2.0] - 2026-07-13
 
